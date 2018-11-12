@@ -2,7 +2,7 @@
   "compilerOptions": {
     "alwaysStrict": true,
     "allowJs": true,
-    "checkJs": true,
+//    "checkJs": true,
 
     "outDir": "./dist/",
     "strict": true,
@@ -10,14 +10,23 @@
     "target": "es6",
     "jsx": "react",
 
+//    "traceResolution": true,
+
 
     "sourceMap": true,
+//    "types": ["node"],
+
+    "typeRoots": [
+      // add path to @types
+//      "node_modules/@types",
+      "node_modules/@firebase"
+      ]
   },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules",
-        "**/*.spec.ts"
-    ]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ],
 }

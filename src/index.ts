@@ -7,5 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('SW registration failed: ', registrationError);
       });
     });
+  } else {
+  	console.log('serviceWorker not available.');
   }
 });
