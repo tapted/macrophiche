@@ -1,4 +1,7 @@
 const path = require('path');
+const workboxPlugin = require('workbox-webpack-plugin');
+const htmlPlugin = require('html-webpack-plugin');
+const cleanPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -18,6 +21,18 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
-  }
+    path: path.resolve(__dirname, 'public/js')
+  },
+  plugins: [
+    new cleanPlugin(['public/js']),
+    new htmlPlugin({
+      filename: 'workbox-index.html',
+      title: 'Workbox For Webpack'
+    }),
+    new workboxPlugin.GenerateSW({
+      swDest: 'sw.js',
+      clientsClaim: true,
+      skipWaiting: true,
+    })
+  ]
 };
