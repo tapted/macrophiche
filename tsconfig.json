@@ -11,22 +11,23 @@
     "jsx": "react",
 
 //    "traceResolution": true,
+    "moduleResolution": "Node",
 
 
     "sourceMap": true,
-//    "types": ["node"],
 
-    "typeRoots": [
+//    "typeRoots": [
       // add path to @types
 //      "node_modules/@types",
-      "node_modules/@firebase"
-      ]
+//      "node_modules/@firebase/app-types"
+//      ]
   },
+//  "types": ["node"],
   "include": [
     "src/**/*"
   ],
   "exclude": [
-    "node_modules",
+//    "node_modules",
     "**/*.spec.ts"
   ],
 }

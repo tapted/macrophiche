@@ -1,0 +1,19 @@
+{
+  "name" : "macrophiche",
+           "url" : "https://macrophiche.firebaseapp.com",
+                   "repository"
+      : {"type" : "git", "url" : "https://github.com/tapted/macrophiche.git"},
+        "license" : "Apache-2.0",
+                    "description" : "A photo thing.",
+                                    "version" : "0.0.1",
+                                                "dependencies"
+      : {
+        "@firebase/webchannel-wrapper" : "^0.2.11",
+        "clang-format" : "^1.2.4",
+        "firebase" : "^5.5.9"
+      },
+        "devDependencies" : {"webpack" : "~4.*", "workbox" : "0.0.0"},
+                            "scripts"
+      : {"prepare" : "coffee -o lib/ -c src/waza.coffee"},
+        "main" : "lib/waza.js"
+}
