@@ -1,3 +1,6 @@
+import {initfire} from './initfire';
+
+document.addEventListener('DOMContentLoaded', initfire);
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

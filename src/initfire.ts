@@ -1,6 +1,11 @@
+import '@firebase/auth';
+import '@firebase/database';
+import '@firebase/messaging';
+import '@firebase/storage';
+
 import firebase from '@firebase/app';
 
-document.addEventListener('DOMContentLoaded', () => {
+export function initfire() {
   // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   // // The Firebase SDK is initialized and available here!
   //
@@ -24,9 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
     let app = firebase.app();
+    let features = [
+      [ 'Auth', app.auth ], [ 'Database', app.database ],
+      [ 'Messaging', app.messaging ], [ 'Storage', app.storage ]
+    ].map((func) => {
+      // console.log(func);
+      return func[1] && func[0];
+    });
+    document.getElementById('load')!.innerHTML =
+        `Firebase SDK loaded with ${features.join(', ')}`;
+
   } catch (e) {
     console.error(e);
     document.getElementById('load')!.innerHTML =
         'Error loading the Firebase SDK, check the console.';
   }
-});
+}
