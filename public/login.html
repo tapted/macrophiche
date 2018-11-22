@@ -14,7 +14,9 @@
     <div id="firebaseui-auth-container"></div>
     <script type="text/javascript" src="js/bundle.js"></script>
     <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
-     <script type="text/javascript">
+    <script type="text/javascript">
+      document.addEventListener('firebase-ready', (event) =>{
+        firebase = event.detail.firebase;
       // FirebaseUI config.
       var uiConfig = {
         signInSuccessUrl: '/',
@@ -37,9 +39,10 @@
       };
 
       // Initialize the FirebaseUI Widget using Firebase.
-      var ui = new firebaseui.auth.AuthUI(firebaseapp.auth());
+      var ui = new firebaseui.auth.AuthUI(firebase.auth());
       // The start method will wait until the DOM is loaded.
       ui.start('#firebaseui-auth-container', uiConfig);
+    });
     </script>
   </body>
 </html>

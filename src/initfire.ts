@@ -38,8 +38,8 @@ export function initfire() {
     });
     document.getElementById('load')!.innerHTML =
         `Firebase SDK loaded with ${features.join(', ')}`;
-    const event = new CustomEvent('build', { firebase: firebase });
-    window.dispatchEvent(event);
+    const event = new CustomEvent('firebase-ready', { detail: {firebase: firebase }});
+    document.dispatchEvent(event);
   } catch (e) {
     console.error(e);
     document.getElementById('load')!.innerHTML =
