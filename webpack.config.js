@@ -4,9 +4,9 @@ const htmlPlugin = require('html-webpack-plugin');
 const cleanPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-  mode: 'production',
-//  mode: 'development',
-//  devtool: 'inline-source-map',
+//  mode: 'production',
+  mode: 'development',
+  devtool: 'inline-source-map',
   entry: './src/index.ts',
   module: {
     rules: [
@@ -36,7 +36,7 @@ module.exports = {
 //     '**/*.js',
      '**/*.html',
 // //    '**/*.css',
-// //    '**/*.ico',
+     '**/*.ico',
 // //    '**/*.json'
        ],
     })
