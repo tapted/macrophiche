@@ -1,7 +1,7 @@
 import '@firebase/auth';
-import '@firebase/database';
-import '@firebase/messaging';
-import '@firebase/storage';
+// import '@firebase/database';
+// import '@firebase/messaging';
+// import '@firebase/storage';
 
 import firebase from '@firebase/app';
 
@@ -19,7 +19,7 @@ export function initfire() {
   // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
   // Initialize Firebase
-  var config = {
+  let config = {
     apiKey : apikeys.kFirebase,
     authDomain : "macrophiche.firebaseapp.com",
     databaseURL : "https://macrophiche.firebaseio.com",
@@ -30,7 +30,7 @@ export function initfire() {
   firebase.initializeApp(config);
 
   try {
-    let app = firebase.app();
+    let app = <any>firebase.app();
     let features = [
       [ 'Auth', app.auth ], [ 'Database', app.database ],
       [ 'Messaging', app.messaging ], [ 'Storage', app.storage ]

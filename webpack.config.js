@@ -4,9 +4,10 @@ const htmlPlugin = require('html-webpack-plugin');
 const cleanPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
+//  mode: 'development',
+//  devtool: 'inline-source-map',
   entry: './src/index.ts',
-  devtool: 'inline-source-map',
   module: {
     rules: [
       {
@@ -20,19 +21,24 @@ module.exports = {
     extensions: [ '.tsx', '.ts', '.js' ]
   },
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'public/js')
+    filename: 'js/bundle.js',
+    path: path.resolve(__dirname, 'public')
   },
   plugins: [
     new cleanPlugin(['public/js']),
-    new htmlPlugin({
-      filename: 'workbox-index.html',
-      title: 'Workbox For Webpack'
-    }),
-    new workboxPlugin.GenerateSW({
+    new workboxPlugin.InjectManifest({
       swDest: 'sw.js',
-      clientsClaim: true,
-      skipWaiting: true,
+      swSrc: 'src/src-sw.js',
+      importsDirectory: 'js',
+
+       globDirectory: 'public/',
+       globPatterns: [
+//     '**/*.js',
+     '**/*.html',
+// //    '**/*.css',
+// //    '**/*.ico',
+// //    '**/*.json'
+       ],
     })
   ]
 };
