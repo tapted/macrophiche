@@ -5,6 +5,8 @@ import '@firebase/storage';
 
 import firebase from '@firebase/app';
 
+import * as apikeys from './apikeys';
+
 export function initfire() {
   // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   // // The Firebase SDK is initialized and available here!
@@ -18,12 +20,12 @@ export function initfire() {
 
   // Initialize Firebase
   var config = {
-    apiKey : apikeys.firebase,
-    authDomain: "macrophiche.firebaseapp.com",
-    databaseURL: "https://macrophiche.firebaseio.com",
-    projectId: "macrophiche",
-    storageBucket: "macrophiche.appspot.com",
-    messagingSenderId: "883029956059"
+    apiKey : apikeys.kFirebase,
+    authDomain : "macrophiche.firebaseapp.com",
+    databaseURL : "https://macrophiche.firebaseio.com",
+    projectId : "macrophiche",
+    storageBucket : "macrophiche.appspot.com",
+    messagingSenderId : "883029956059"
   };
   firebase.initializeApp(config);
 
@@ -38,7 +40,8 @@ export function initfire() {
     });
     document.getElementById('load')!.innerHTML =
         `Firebase SDK loaded with ${features.join(', ')}`;
-    const event = new CustomEvent('firebase-ready', { detail: {firebase: firebase }});
+    const event =
+        new CustomEvent('firebase-ready', {detail : {firebase : firebase}});
     document.dispatchEvent(event);
   } catch (e) {
     console.error(e);

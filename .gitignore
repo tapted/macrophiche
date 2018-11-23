@@ -1,3 +1,14 @@
+src/apikeys.ts
+
+Makefile
+dist/
+functions/package-lock.json
+log
+macrophiche.sublime-workspace
+package-lock.json
+public/js/
+
+
 # Logs
 logs
 *.log
