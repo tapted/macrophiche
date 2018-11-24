@@ -13,7 +13,7 @@ export class UserCard extends HTMLElement {
 
     this.p = document.createElement('p');
     this.appendChild(this.p);
-    //this._update(MPUser.current);
+    // this._update(MPUser.current);
   }
   _update(model: MPUser) {
     this.img.src = model.photoUrl;

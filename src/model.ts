@@ -1,10 +1,8 @@
 import firebase from '@firebase/app';
-
 import {User, UserInfo} from '@firebase/auth-types';
 
-import {UserCard} from './user_card';
-
 import * as apikeys from './apikeys';
+import {UserCard} from './user_card';
 
 const kNoPhotoUrl = 'images/icons/icon-128x128.png';
 const kAlbumPageSize = 50;
@@ -16,7 +14,7 @@ function logError(err: any) {
     return err.error;
   }
   let error = err.error.error ||
-      {name: err.name, code: err.statusCode, message: err.message};
+              {name : err.name, code : err.statusCode, message : err.message};
   console.log(error);
   return error;
 }
@@ -35,7 +33,6 @@ export class MPUser {
 
   public authUser: (User|null) = null;
   public gapiUser: (gapi.auth2.GoogleUser|null) = null;
-  public oauthToken: (string|null) = null;
 
   private albums: object[] = [];
 
@@ -51,54 +48,55 @@ export class MPUser {
     this.providerData = authUser.providerData;
 
     this.authUser = authUser;
-    // this.loadApi();
-    this.updateAlbums();
+    (<any>gapi).load('client', () => { this.initApi(); });
   }
 
-  async loadApi() {
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.onload = (event) => {
-      (<any>gapi).load('client', () => { this.initApi(); });
-    };
-    script.src = 'https://apis.google.com/js/api.js';
-    document.body.appendChild(script);  
-  }
-
-  // Initialize the Google API Client with the config object
   async initApi() {
-    console.log('Initializing Google API Client');
-     await gapi.client.init({
-       apiKey: apikeys.kPhotos.web.client_secret,
-       clientId: apikeys.kPhotos.web.client_id,
-       discoveryDocs: [],
-//       discoveryDocs: config.discoveryDocs,
-       scope: apikeys.kScopes.join(' ')
-     });
+    await gapi.client.init({
+      apiKey : apikeys.kFirebase,
+      clientId : apikeys.kPhotos.web.client_id,
+      discoveryDocs : [],
+      scope : apikeys.kScopes.join(' ')
+    });
+
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+      console.log('Already signed in.');
+      this.updateAlbums();
+    }
+    document.querySelector('#load-api')!.addEventListener(
+        'click', this.signIn.bind(this));
+  }
+
+  async signIn() {
+    if (!firebase.auth)
+      return;
+
+    console.log('Signing in..')
+    const googleAuth = gapi.auth2.getAuthInstance()
+    const googleUser = await googleAuth.signIn();
+    const idToken = googleUser.getAuthResponse().id_token;
+    const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+    await firebase.auth().signInAndRetrieveDataWithCredential(credential);
+
     // Make sure the Google API Client is properly signed in
     if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
       console.log('Not signed in I guess');
-      //firebase.auth!().signOut(); // Something went wrong, sign out
+      // firebase.auth!().signOut(); // Something went wrong, sign out
       return;
     }
 
-    this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
-    this.oauthToken = this.gapiUser.getAuthResponse().access_token;
     this.updateAlbums();
   }
 
   async updateAlbums() {
     console.log('Updating albums..');
+    this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
     this.albums = [];
 
-    if (!this.authUser)
-      return;
-
     let error = null;
-  
-    try {
-      const authToken = await this.authUser.getToken();
 
+    try {
+      const authToken = this.gapiUser.getAuthResponse().access_token;
       let nextPageToken = null;
       do {
         console.log(`Loading albums. Received so far: ${this.albums.length}`);
@@ -106,13 +104,10 @@ export class MPUser {
         let url = kApiEndpoint + '/v1/albums?pageSize=50';
         if (nextPageToken)
           url += '&pageToken=' + nextPageToken;
-        console.log(authToken);
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }});
+        const response = await fetch(
+            url, {headers : {Authorization : `Bearer ${authToken}`}});
         const result = await response.json();
-        if (!result)   
+        if (!result)
           break;
 
         if (result.error)
@@ -120,7 +115,7 @@ export class MPUser {
 
         if (result.albums) {
           console.log(`Number of albums received: ${result.albums.length}`);
-          const items = result.albums.filter((x:object) => !!x);
+          const items = result.albums.filter((x: object) => !!x);
           this.albums = this.albums.concat(items);
         }
         nextPageToken = result.nextPageToken;
@@ -131,8 +126,7 @@ export class MPUser {
     }
 
     console.log('Albums loaded.');
-    console.log(this.albums);
-    return [this.albums, error];
+    return [ this.albums, error ];
   }
 }
 
