@@ -34,7 +34,7 @@ export class MPUser {
   public authUser: (User|null) = null;
   public gapiUser: (gapi.auth2.GoogleUser|null) = null;
 
-  private albums: object[] = [];
+  public albums: object[] = [];
 
   constructor() {}
 
@@ -114,7 +114,6 @@ export class MPUser {
           logError(result);
 
         if (result.albums) {
-          console.log(`Number of albums received: ${result.albums.length}`);
           const items = result.albums.filter((x: object) => !!x);
           this.albums = this.albums.concat(items);
         }
@@ -125,7 +124,7 @@ export class MPUser {
       error = logError(err);
     }
 
-    console.log('Albums loaded.');
+    console.log(`${this.albums.length} Albums loaded.`);
     return [ this.albums, error ];
   }
 }
