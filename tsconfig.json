@@ -12,6 +12,7 @@
     "moduleResolution": "Node",
 //    "sourceMap": true,
     "sourceMap": false,
+    "types": ["gapi", "gapi.auth2"]
   },
   "include": [
     "src/**/*"

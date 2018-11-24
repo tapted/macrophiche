@@ -25,7 +25,10 @@ export function initfire() {
     databaseURL : "https://macrophiche.firebaseio.com",
     projectId : "macrophiche",
     storageBucket : "macrophiche.appspot.com",
-    messagingSenderId : "883029956059"
+    messagingSenderId : "883029956059",
+
+    clientId: apikeys.kPhotos.web.client_id,
+    scopes: apikeys.kScopes
   };
   firebase.initializeApp(config);
 

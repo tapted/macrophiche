@@ -9,6 +9,8 @@
   "description": "A photo thing.",
   "version": "0.0.1",
   "dependencies": {
+    "@types/gapi": "0.0.36",
+    "@types/gapi.auth2": "0.0.48",
     "clang-format": "^1.2.4",
     "clean-webpack-plugin": "^1.0.0",
     "firebase": "^5.5.9",
