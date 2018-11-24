@@ -1,3 +1,5 @@
+import './model';
+
 import {initfire} from './initfire';
 
 document.addEventListener('DOMContentLoaded', initfire);
