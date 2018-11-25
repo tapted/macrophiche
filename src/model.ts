@@ -1,7 +1,9 @@
 import firebase from '@firebase/app';
 import {User, UserInfo} from '@firebase/auth-types';
 
+import {AlbumList} from './album_list';
 import * as apikeys from './apikeys';
+import {photos} from './photos_api';
 import {UserCard} from './user_card';
 
 const kNoPhotoUrl = 'images/icons/icon-128x128.png';
@@ -9,12 +11,15 @@ const kAlbumPageSize = 50;
 const kApiEndpoint = 'https://photoslibrary.googleapis.com';
 
 function logError(err: any) {
-  if (err.error.code) {
+  if (err.error && err.error.code) {
     console.log(err.error);
     return err.error;
   }
-  let error = err.error.error ||
-              {name : err.name, code : err.statusCode, message : err.message};
+  if (err.error && err.error.error) {
+    console.log(err.error.error);
+    return err.error.error;
+  }
+  let error = {name : err.name, code : err.statusCode, message : err.message};
   console.log(error);
   return error;
 }
@@ -34,7 +39,7 @@ export class MPUser {
   public authUser: (User|null) = null;
   public gapiUser: (gapi.auth2.GoogleUser|null) = null;
 
-  public albums: object[] = [];
+  public albums: photos.Album[] = [];
 
   constructor() {}
 
@@ -116,6 +121,7 @@ export class MPUser {
         if (result.albums) {
           const items = result.albums.filter((x: object) => !!x);
           this.albums = this.albums.concat(items);
+          AlbumList.update();
         }
         nextPageToken = result.nextPageToken;
       } while (nextPageToken != null);

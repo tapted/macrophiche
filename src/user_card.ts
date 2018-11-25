@@ -2,16 +2,22 @@ import {MPUser} from './model';
 
 export class UserCard extends HTMLElement {
   private img: HTMLImageElement;
-  private p: HTMLParagraphElement;
+  private p: HTMLSpanElement;
 
   constructor() {
     super();
+    const kRadius = 32;
+
+    this.style.display = 'flex';
+    this.style.alignItems = 'center';
+
     this.img = document.createElement('img');
-    this.img.width = 128;
-    this.img.height = 128;
+    this.img.width = kRadius * 2;
+    this.img.height = kRadius * 2;
+    this.img.style.clipPath = `circle(${kRadius}px at center)`;
     this.appendChild(this.img);
 
-    this.p = document.createElement('p');
+    this.p = document.createElement('span');
     this.appendChild(this.p);
     // this._update(MPUser.current);
   }

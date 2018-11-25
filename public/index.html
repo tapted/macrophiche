@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
+      #message { background: white; max-width: 360px; margin-left: auto; margin-right:auto; padding: 16px 12px; border-radius: 3px; }
       #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
       #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
       #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
@@ -27,9 +27,10 @@
       <h2>Welcome</h2>
       <h1>Macrophiche - it's a photo thing</h1>
     </div>
+    <ul is="album-list" id="album-list"></ul>
     <p id="load">Firebase SDK Loading&hellip;</p>
     <p><a href="login.html" title="Login">Login</a></p>
-    <button id="load-api">Load API</button>
+    <button id="load-api">Link to Google Photos</button>
     <script type="text/javascript" src="js/bundle.js"></script>
   </body>
 </html>
