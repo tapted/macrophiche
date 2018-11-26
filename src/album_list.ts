@@ -1,35 +1,33 @@
 import {MPUser} from './model';
 import {photos} from './photos_api';
 
-class MPAlbum extends HTMLLIElement {
-  constructor() { super(); }
+const kAlbumTemplate = document.createElement('template');
+kAlbumTemplate.innerHTML = `<li>
+<label><input type="checkbox"></input><span></span></label>
+<a target="_blank">🔗</a> (<span></span> items)</li>`;
+
+class MPAlbum extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({mode : 'open'});
+    this.shadowRoot!.appendChild(kAlbumTemplate.content.cloneNode(true));
+  }
 
   static create(data: photos.Album): MPAlbum {
-    const album = <MPAlbum>document.createElement('li', {is : 'mp-album'});
+    const album = <MPAlbum>document.createElement('mp-album');
     album.update(data);
     return album;
   }
 
   public update(data: photos.Album) {
-    const check = document.createElement('input');
-    check.type = 'checkbox';
-    check.name = data.id;
-    const labelText = document.createElement('span');
-    labelText.innerText = data.title;
-    const label = document.createElement('label');
-    label.appendChild(check);
-    label.appendChild(labelText);
-    const link = document.createElement('a');
-    link.innerText = '🔗';
-    link.href = data.productUrl;
-    link.target = '_blank';
-    const summary = document.createElement('span');
-    summary.innerText = ` (${data.mediaItemsCount})`;
-    [label, link, summary].forEach((child) => { this.appendChild(child); });
+    this.shadowRoot!.querySelectorAll('span')[0]!.innerText = data.title;
+    this.shadowRoot!.querySelector('a')!.href = data.productUrl;
+    this.shadowRoot!.querySelectorAll('span')[1]!.innerText =
+        data.mediaItemsCount;
   }
 }
 
-window.customElements.define('mp-album', MPAlbum, {extends : 'li'});
+window.customElements.define('mp-album', MPAlbum);
 
 export class AlbumList extends HTMLUListElement {
   private albums = new Map<string, MPAlbum>();
