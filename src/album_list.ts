@@ -6,11 +6,27 @@ kAlbumTemplate.innerHTML = `<li>
 <label><input type="checkbox"></input><span></span></label>
 <a target="_blank">🔗</a> (<span></span> items)</li>`;
 
-class MPAlbum extends HTMLElement {
-  constructor() {
+class ShadowElement extends HTMLElement {
+  constructor(template: HTMLTemplateElement) {
     super();
     this.attachShadow({mode : 'open'});
-    this.shadowRoot!.appendChild(kAlbumTemplate.content.cloneNode(true));
+    this.shadowRoot!.appendChild(template.content.cloneNode(true));
+  }
+
+  qA(): HTMLAnchorElement {
+    return this.shadowRoot!.querySelector('a')!;
+  }
+  qSpan() : HTMLSpanElement {
+    return this.shadowRoot!.querySelector('span')!;
+  }
+  qSpanX(index: number) : HTMLSpanElement {
+    return this.shadowRoot!.querySelectorAll('span')[index]!;
+  }
+}
+
+class MPAlbum extends ShadowElement {
+  constructor() {
+    super(kAlbumTemplate);
   }
 
   static create(data: photos.Album): MPAlbum {
@@ -20,10 +36,9 @@ class MPAlbum extends HTMLElement {
   }
 
   public update(data: photos.Album) {
-    this.shadowRoot!.querySelectorAll('span')[0]!.innerText = data.title;
-    this.shadowRoot!.querySelector('a')!.href = data.productUrl;
-    this.shadowRoot!.querySelectorAll('span')[1]!.innerText =
-        data.mediaItemsCount;
+    this.qSpanX(0).innerText = data.title;
+    this.qA().href = data.productUrl;
+    this.qSpanX(1).innerText = data.mediaItemsCount;
   }
 }
 
