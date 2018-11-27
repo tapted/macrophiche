@@ -10,6 +10,8 @@ const kNoPhotoUrl = 'images/icons/icon-128x128.png';
 const kAlbumPageSize = 50;
 const kApiEndpoint = 'https://photoslibrary.googleapis.com';
 
+const statusPara = <HTMLParagraphElement>document.querySelector('p.status');
+
 function logError(err: any) {
   if (err.error && err.error.code) {
     console.log(err.error);
@@ -65,7 +67,6 @@ export class MPUser {
     });
 
     if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      console.log('Already signed in.');
       this.updateAlbums();
     }
     document.querySelector('#load-api')!.addEventListener(
@@ -76,16 +77,15 @@ export class MPUser {
     if (!firebase.auth)
       return;
 
-    console.log('Signing in..')
+    statusPara.innerText = 'Linking to Photos API…';
     const googleAuth = gapi.auth2.getAuthInstance()
     const googleUser = await googleAuth.signIn();
     const idToken = googleUser.getAuthResponse().id_token;
     const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
     await firebase.auth().signInAndRetrieveDataWithCredential(credential);
 
-    // Make sure the Google API Client is properly signed in
     if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      console.log('Not signed in I guess');
+      statusPara.innerText = 'Failed to link photos API.';
       // firebase.auth!().signOut(); // Something went wrong, sign out
       return;
     }
@@ -94,7 +94,7 @@ export class MPUser {
   }
 
   async updateAlbums() {
-    console.log('Updating albums..');
+    statusPara.innerText = 'Updating albums via gapi…';
     this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
     this.albums = [];
 
@@ -104,8 +104,6 @@ export class MPUser {
       const authToken = this.gapiUser.getAuthResponse().access_token;
       let nextPageToken = null;
       do {
-        console.log(`Loading albums. Received so far: ${this.albums.length}`);
-
         let url = kApiEndpoint + '/v1/albums?pageSize=50';
         if (nextPageToken)
           url += '&pageToken=' + nextPageToken;
@@ -124,13 +122,15 @@ export class MPUser {
           AlbumList.update();
         }
         nextPageToken = result.nextPageToken;
+        if (nextPageToken)
+          statusPara.innerText = `${this.albums.length} albums. Fetching more…`;
       } while (nextPageToken != null);
 
     } catch (err) {
       error = logError(err);
     }
 
-    console.log(`${this.albums.length} Albums loaded.`);
+    statusPara.innerText = `${this.albums.length} Albums loaded over gapi. Ready.`;
     return [ this.albums, error ];
   }
 }
@@ -142,9 +142,11 @@ document.addEventListener('firebase-ready', (event) => {
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       // User is signed in.
+      statusPara.innerText = 'Logged in via Firebase. Checking gapi.';
       MPUser.current.apply(user);
     } else {
       // User is signed out.
+      statusPara.innerText = 'Not logged in. Placeholder user.';
       MPUser.current = new MPUser();
     }
     UserCard.update();
