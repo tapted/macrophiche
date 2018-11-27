@@ -119,7 +119,7 @@ export class MPUser {
         if (result.albums) {
           const items = result.albums.filter((x: object) => !!x);
           this.albums = this.albums.concat(items);
-          AlbumList.update();
+          AlbumList.update(authToken);
         }
         nextPageToken = result.nextPageToken;
         if (nextPageToken)

@@ -23,7 +23,7 @@ export class UserCard extends HTMLElement {
   }
   _update(model: MPUser) {
     this.img.src = model.photoUrl;
-    this.p.innerText = `${model.displayName} (${model.email})`;
+    this.p.innerText = ` ${model.displayName} (${model.email})`;
   }
   static update() {
     let card = <UserCard>document.querySelector('user-card');
