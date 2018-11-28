@@ -2,30 +2,31 @@ import {MPUser} from './model';
 import {photos} from './photos_api';
 
 const kImgSize = 200;
-const kPad = 10;
-const kOutline = 5;
-const kRadius = 5;
+const kPad = 10;     // Padding between albums.
+const kOutline = 5;  // Thicknes of the selection outline.
+const kRadius = 5;   // Rectangle corner radius.
+const kMargin = 10;  // Margin around text inside each album.
 const kAlbumTemplate = document.createElement('template');
 kAlbumTemplate.innerHTML = `
 <style>
 li {
   clip-path: inset(0px ${kPad}px ${kPad}px 0px round ${kRadius}px);
   background-color: lightgray;
+  padding: ${kOutline};
 }
 label {
   width: ${kImgSize}px;
   height: ${kImgSize}px;
   display: inline-block;
-  padding: ${kPad}px;
-  clip-path: inset(${kOutline}px ${kPad * 2}px ${kPad * 2}px ${kOutline}px round ${kRadius}px);
+  padding: ${kMargin}px;
+  clip-path: inset(0 0 0 0 round ${kRadius}px);
   color: white;
-  text-shadow: 2px 2px black;
+  text-shadow: 1px 1px black;
   background-repeat: no-repeat;
-  background-position: ${kOutline}px ${kOutline}px;
 }
 label:hover {
   color: black;
-  text-shadow: 2px 2px white;
+  text-shadow: 1px 1px white;
 }
 input {
   opacity: 0;
@@ -34,8 +35,9 @@ input {
 </style>
 <li>
 <label><input type="checkbox"></input>
+<p>
 <span></span>
-<a target="_blank">🔗</a> (<span></span> items)</li></label>`;
+<a target="_blank">🔗</a> (<span></span> items)<p></li></label>`;
 
 class ShadowElement extends HTMLElement {
   constructor(template: HTMLTemplateElement) {
@@ -63,7 +65,7 @@ class ShadowElement extends HTMLElement {
     return this.shadowRoot!.querySelector('span')!;
   }
   qSpanX(index: number) : HTMLSpanElement {
-    return this.shadowRoot!.querySelectorAll('span')[index]!;
+    return this.shadowRoot!.querySelectorAll('span')[index];
   }
 }
 
