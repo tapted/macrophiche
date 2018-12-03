@@ -86,13 +86,13 @@ class MPAlbum extends ShadowElement {
     });
   }
 
-  static create(data: photos.Album, authToken: string): MPAlbum {
+  static create(data: photos.Album, authToken: string|null): MPAlbum {
     const album = <MPAlbum>document.createElement('mp-album');
     album.update(data, authToken);
     return album;
   }
 
-  public update(data: photos.Album, authToken: string) {
+  public update(data: photos.Album, authToken: string|null) {
     this.qSpanX(0).innerText = data.title;
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;
@@ -126,7 +126,7 @@ export class AlbumList extends HTMLUListElement {
     this.style.padding = `${kPad}px`;
     this.style.userSelect = 'none';
   }
-  _update(model: MPUser, authToken:string) {
+  _update(model: MPUser, authToken:string|null) {
     // TOOD: Removal logic.
     model.albums.forEach((data) => {
       let album = this.albums.get(data.id);
@@ -139,7 +139,10 @@ export class AlbumList extends HTMLUListElement {
       this.appendChild(album);
     });
   }
-  static update(authToken: string) {
+  static create() {
+    AlbumList.update(null);
+  }
+  static update(authToken: string|null) {
     let list = <AlbumList>document.querySelector('#album-list');
     if (!list) {
       console.error('Missing <album-list>');

@@ -1,5 +1,6 @@
 import firebase from '@firebase/app';
 import {User, UserInfo} from '@firebase/auth-types';
+import idb from 'idb';
 
 import {AlbumList} from './album_list';
 import * as apikeys from './apikeys';
@@ -28,6 +29,8 @@ function logError(err: any) {
 
 let gapiReady = false;
 let onGapiReady: null | (() => void) = null;
+
+const idbReady = idb.open('users', 1);
 
 // Macrophiche user.
 export class MPUser {
@@ -58,7 +61,32 @@ export class MPUser {
     this.providerData = authUser.providerData;
 
     this.authUser = authUser;
+    this.tryLoad();
     this.initApi();
+  }
+
+  async getStore(write = false) {
+    const db = await idbReady;
+    const tx = db.transaction('mp-user', write ? 'readwrite' : 'readonly');
+    return tx.objectStore(this.uid);
+  }
+
+  async tryLoad() {
+    const store = await this.getStore();
+    const storeAlbums = await store.get('albums');
+    if (this.gapiUser == null) {
+      console.log('Using ' + storeAlbums.length + ' from db.');
+      this.albums = storeAlbums;
+      AlbumList.create();
+    } else {
+      console.log('gapi beat indexdb.');
+    }
+  }
+
+  async save() {
+    const store = await this.getStore(true);
+    await store.put(this.albums, 'albums');
+    console.log('Saved ' + this.albums.length + ' albums.');
   }
 
   async initApi() {
@@ -138,6 +166,7 @@ export class MPUser {
     }
 
     statusPara.innerText = `${this.albums.length} Albums loaded over gapi. Ready.`;
+    this.save();
     return [ this.albums, error ];
   }
 }
