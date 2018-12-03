@@ -26,6 +26,9 @@ function logError(err: any) {
   return error;
 }
 
+let gapiReady = false;
+let onGapiReady: null | (() => void) = null;
+
 // Macrophiche user.
 export class MPUser {
   static current = new MPUser();
@@ -55,10 +58,14 @@ export class MPUser {
     this.providerData = authUser.providerData;
 
     this.authUser = authUser;
-    (<any>gapi).load('client', () => { this.initApi(); });
+    this.initApi();
   }
 
   async initApi() {
+    if (!gapiReady) {
+      onGapiReady = this.initApi.bind(this);
+      return;
+    }
     await gapi.client.init({
       apiKey : apikeys.kFirebase,
       clientId : apikeys.kPhotos.web.client_id,
@@ -134,6 +141,23 @@ export class MPUser {
     return [ this.albums, error ];
   }
 }
+
+function gapiPreload() {
+  const gapiScript = document.createElement('script');
+  gapiScript.onload = () => {
+    (<any>gapi).load('client', () => {
+      gapiReady = true;
+      if (onGapiReady) {
+        onGapiReady();
+        onGapiReady = null;
+      }
+    });
+  };
+  document.body.appendChild(gapiScript);
+  gapiScript.src = 'https://apis.google.com/js/api.js';
+}
+
+document.addEventListener('serviceworker-ready', gapiPreload);
 
 document.addEventListener('firebase-ready', (event) => {
   if (!firebase.auth)

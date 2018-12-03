@@ -5,24 +5,28 @@ const kImgSize = 200;
 const kPad = 10;     // Padding between albums.
 const kOutline = 5;  // Thicknes of the selection outline.
 const kRadius = 5;   // Rectangle corner radius.
-const kMargin = 10;  // Margin around text inside each album.
+const kMargin = 15;  // Margin around text inside each album.
 const kAlbumTemplate = document.createElement('template');
 kAlbumTemplate.innerHTML = `
 <style>
 li {
-  clip-path: inset(0px ${kPad}px ${kPad}px 0px round ${kRadius}px);
+  clip-path: inset(0 round ${kRadius}px);
   background-color: lightgray;
-  padding: ${kOutline};
+  padding: ${kOutline}px;
+  margin: 0 ${kPad}px ${kPad}px 0;
 }
 label {
   width: ${kImgSize}px;
   height: ${kImgSize}px;
   display: inline-block;
-  padding: ${kMargin}px;
-  clip-path: inset(0 0 0 0 round ${kRadius}px);
+  clip-path: inset(0 round ${kRadius}px);
   color: white;
   text-shadow: 1px 1px black;
   background-repeat: no-repeat;
+}
+p {
+  margin: 0;
+  padding: ${kMargin}px;
 }
 label:hover {
   color: black;
@@ -37,7 +41,7 @@ input {
 <label><input type="checkbox"></input>
 <p>
 <span></span>
-<a target="_blank">🔗</a> (<span></span> items)<p></li></label>`;
+<a target="_blank">🔗</a> (<span></span> items)</p></li></label>`;
 
 class ShadowElement extends HTMLElement {
   constructor(template: HTMLTemplateElement) {
@@ -88,7 +92,7 @@ class MPAlbum extends ShadowElement {
     return album;
   }
 
-  public async update(data: photos.Album, authToken: string) {
+  public update(data: photos.Album, authToken: string) {
     this.qSpanX(0).innerText = data.title;
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;
@@ -113,6 +117,7 @@ export class AlbumList extends HTMLUListElement {
     this.style.flexWrap = 'wrap';
     this.style.listStyleType = 'none';
     this.style.padding = `${kPad}px`;
+    this.style.userSelect = 'none';
   }
   _update(model: MPUser, authToken:string) {
     // TOOD: Removal logic.
