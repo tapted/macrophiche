@@ -1,5 +1,6 @@
 import firebase from '@firebase/app';
 import {User, UserInfo} from '@firebase/auth-types';
+// import {ObjectStore} from 'idb';
 import idb from 'idb';
 
 import {AlbumList} from './album_list';
@@ -8,7 +9,7 @@ import {photos} from './photos_api';
 import {UserCard} from './user_card';
 
 const kNoPhotoUrl = 'images/icons/icon-128x128.png';
-const kAlbumPageSize = 50;
+const kAlbumPageSize = 5; //50;
 const kApiEndpoint = 'https://photoslibrary.googleapis.com';
 
 const statusPara = <HTMLParagraphElement>document.querySelector('p.status');
@@ -30,7 +31,14 @@ function logError(err: any) {
 let gapiReady = false;
 let onGapiReady: null | (() => void) = null;
 
-const idbReady = idb.open('users', 1);
+const kStoreName = 'mp-user';
+const idbReady = idb.open('users', 3, upgradeDB => {
+  console.log('Preparing indexdb. oldVersion: ' + upgradeDB.oldVersion);
+  switch (upgradeDB.oldVersion) {
+    case 0:
+      upgradeDB.createObjectStore(kStoreName);
+  }
+});
 
 // Macrophiche user.
 export class MPUser {
@@ -65,18 +73,22 @@ export class MPUser {
     this.initApi();
   }
 
-  async getStore(write = false) {
+  async getStore(write = false) : Promise<{store:any, albums: photos.Album[]}> {
     const db = await idbReady;
-    const tx = db.transaction('mp-user', write ? 'readwrite' : 'readonly');
-    return tx.objectStore(this.uid);
+    const tx = db.transaction(kStoreName, write ? 'readwrite' : 'readonly');
+    const store = tx.objectStore(kStoreName);
+    const data = await store.get(this.uid);
+    const result = {store: store, albums: []};
+    if (data)
+      result.albums = data.albums;
+    return result;
   }
 
   async tryLoad() {
     const store = await this.getStore();
-    const storeAlbums = await store.get('albums');
     if (this.gapiUser == null) {
-      console.log('Using ' + storeAlbums.length + ' from db.');
-      this.albums = storeAlbums;
+      console.log('Using ' + store.albums.length + ' from db.');
+      this.albums = store.albums;
       AlbumList.create();
     } else {
       console.log('gapi beat indexdb.');
@@ -85,8 +97,8 @@ export class MPUser {
 
   async save() {
     const store = await this.getStore(true);
-    await store.put(this.albums, 'albums');
-    console.log('Saved ' + this.albums.length + ' albums.');
+    await store.store.put({albums:this.albums}, this.uid);
+    console.log('Saved ' + store.albums.length + ' albums.');
   }
 
   async initApi() {
@@ -159,7 +171,7 @@ export class MPUser {
         nextPageToken = result.nextPageToken;
         if (nextPageToken)
           statusPara.innerText = `${this.albums.length} albums. Fetching more…`;
-      } while (nextPageToken != null);
+      } while (false && nextPageToken != null);
 
     } catch (err) {
       error = logError(err);
