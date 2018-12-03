@@ -96,8 +96,15 @@ class MPAlbum extends ShadowElement {
     this.qSpanX(0).innerText = data.title;
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;
-    const url = 'url(' + data.coverPhotoBaseUrl + `=w${kImgSize}-h${kImgSize}-c)`;
-    this.qLabel().style.backgroundImage = url;
+    const url = data.coverPhotoBaseUrl + `=w${kImgSize}-h${kImgSize}-c`;
+    const img = new Image();
+    img.src = url;
+    img.decode().then(() => {
+      this.qLabel().style.backgroundImage = `url(${url})`;
+    }).catch(() => {
+      throw new Error('Could not load/decode big image.');
+    });
+
     // const response = await fetch(
     //         url, {mode: 'no-cors',
     //         headers : {Authorization : `Bearer ${authToken}`}});
