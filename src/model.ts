@@ -3,6 +3,7 @@ import {User, UserInfo} from '@firebase/auth-types';
 
 import {AlbumList} from './album_list';
 import * as apikeys from './apikeys';
+import {LightBox} from './light_box';
 import {photos} from './photos_api';
 import * as schema from './schema';
 import {UserCard} from './user_card';
@@ -61,6 +62,11 @@ export class MPUser {
     this.authUser = authUser;
     this.tryLoad();
     this.initApi();
+  }
+
+  public albumChecked(album: photos.Album, checked: boolean) {
+    if (checked)
+      LightBox.setAlbum(album);
   }
 
   async tryLoad() {

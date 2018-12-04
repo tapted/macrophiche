@@ -68,6 +68,7 @@ class ShadowElement extends HTMLElement {
 class MPAlbum extends ShadowElement {
   private li: HTMLLIElement;
   private check: HTMLInputElement;
+  private album: photos.Album|null = null;
 
   constructor() {
     super(kAlbumTemplate);
@@ -75,6 +76,8 @@ class MPAlbum extends ShadowElement {
     this.check = this.qInput();
     this.check.addEventListener('input', () => {
       this.li.style.backgroundColor = this.check.checked ? 'blue' : 'lightgray';
+      if (this.album)
+        MPUser.current.albumChecked(this.album, this.check.checked);
     });
   }
 
@@ -85,6 +88,7 @@ class MPAlbum extends ShadowElement {
   }
 
   public async update(data: photos.Album) {
+    this.album = data;
     this.qSpanX(0).innerText = data.title;
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;

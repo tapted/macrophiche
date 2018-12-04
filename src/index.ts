@@ -19,19 +19,18 @@ function finishLoad() {
 document.addEventListener('DOMContentLoaded', initfire);
 document.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            finishLoad();
-            console.log('SW registered: ', registration);
-            return;
-          })
-          .catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
+    window.addEventListener('load', async () => {
+      try {
+        let registration = await navigator.serviceWorker.register('/sw.js');
+        finishLoad();
+        console.log('SW registered: ', registration);
+      } catch (registrationError) {
+        finishLoad();
+        console.log('SW registration failed: ', registrationError);
+      }
     });
   } else {
     console.log('serviceWorker not available.');
+    finishLoad();
   }
-  finishLoad();
 });
