@@ -1,10 +1,10 @@
 import firebase from '@firebase/app';
 import {User, UserInfo} from '@firebase/auth-types';
-import idb from 'idb';
 
 import {AlbumList} from './album_list';
 import * as apikeys from './apikeys';
 import {photos} from './photos_api';
+import * as schema from './schema';
 import {UserCard} from './user_card';
 
 const kNoPhotoUrl = 'images/icons/icon-128x128.png';
@@ -29,15 +29,6 @@ function logError(err: any) {
 
 let gapiReady = false;
 let onGapiReady: null|(() => void) = null;
-
-const kStoreName = 'mp-user';
-const idbReady = idb.open('users', 3, upgradeDB => {
-  console.log('Preparing indexdb. oldVersion: ' + upgradeDB.oldVersion);
-  switch (upgradeDB.oldVersion) {
-  case 0:
-    upgradeDB.createObjectStore(kStoreName);
-  }
-});
 
 // Macrophiche user.
 export class MPUser {
@@ -72,23 +63,11 @@ export class MPUser {
     this.initApi();
   }
 
-  async getStore(write = false):
-      Promise<{store : any, albums: photos.Album[]}> {
-    const db = await idbReady;
-    const tx = db.transaction(kStoreName, write ? 'readwrite' : 'readonly');
-    const store = tx.objectStore(kStoreName);
-    const data = await store.get(this.uid);
-    const result = {store : store, albums : []};
-    if (data)
-      result.albums = data.albums;
-    return result;
-  }
-
   async tryLoad() {
-    const store = await this.getStore();
+    const data = await schema.getForUid(this.uid);
     if (this.gapiUser == null) {
-      console.log('Using ' + store.albums.length + ' from db.');
-      this.albums = store.albums;
+      console.log('Using ' + data.albums.length + ' from db.');
+      this.albums = data.albums;
       AlbumList.create();
     } else {
       console.log('gapi beat indexdb.');
@@ -96,8 +75,7 @@ export class MPUser {
   }
 
   async save() {
-    const store = await this.getStore(true);
-    await store.store.put({albums : this.albums}, this.uid);
+    await schema.setForUid(this.uid, {albums : this.albums});
     console.log('Saved ' + this.albums.length + ' albums.');
   }
 

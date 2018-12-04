@@ -1,3 +1,4 @@
+// Import model for side-effects (adding event listeners).
 import './model';
 
 import {initfire} from './initfire';
