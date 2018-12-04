@@ -1,6 +1,5 @@
 import firebase from '@firebase/app';
 import {User, UserInfo} from '@firebase/auth-types';
-// import {ObjectStore} from 'idb';
 import idb from 'idb';
 
 import {AlbumList} from './album_list';
@@ -9,7 +8,7 @@ import {photos} from './photos_api';
 import {UserCard} from './user_card';
 
 const kNoPhotoUrl = 'images/icons/icon-128x128.png';
-const kAlbumPageSize = 5; //50;
+const kAlbumPageSize = 50;
 const kApiEndpoint = 'https://photoslibrary.googleapis.com';
 
 const statusPara = <HTMLParagraphElement>document.querySelector('p.status');
@@ -98,7 +97,7 @@ export class MPUser {
   async save() {
     const store = await this.getStore(true);
     await store.store.put({albums:this.albums}, this.uid);
-    console.log('Saved ' + store.albums.length + ' albums.');
+    console.log('Saved ' + this.albums.length + ' albums.');
   }
 
   async initApi() {
@@ -151,7 +150,7 @@ export class MPUser {
       const authToken = this.gapiUser.getAuthResponse().access_token;
       let nextPageToken = null;
       do {
-        let url = kApiEndpoint + '/v1/albums?pageSize=50';
+        let url = kApiEndpoint + '/v1/albums?pageSize=' + kAlbumPageSize;
         if (nextPageToken)
           url += '&pageToken=' + nextPageToken;
         const response = await fetch(
@@ -166,19 +165,19 @@ export class MPUser {
         if (result.albums) {
           const items = result.albums.filter((x: object) => !!x);
           this.albums = this.albums.concat(items);
-          AlbumList.update(authToken);
+          AlbumList.update();
         }
         nextPageToken = result.nextPageToken;
         if (nextPageToken)
           statusPara.innerText = `${this.albums.length} albums. Fetching more…`;
-      } while (false && nextPageToken != null);
-
+      } while (nextPageToken != null);
+      this.save();
     } catch (err) {
       error = logError(err);
     }
 
-    statusPara.innerText = `${this.albums.length} Albums loaded over gapi. Ready.`;
-    this.save();
+    const errorText = error ? ` (${error.message})` : '';
+    statusPara.innerText = `${this.albums.length} Albums loaded over gapi${errorText}. Ready.`;
     return [ this.albums, error ];
   }
 }

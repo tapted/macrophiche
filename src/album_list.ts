@@ -86,30 +86,21 @@ class MPAlbum extends ShadowElement {
     });
   }
 
-  static create(data: photos.Album, authToken: string|null): MPAlbum {
+  static create(data: photos.Album): MPAlbum {
     const album = <MPAlbum>document.createElement('mp-album');
-    album.update(data, authToken);
+    album.update(data);
     return album;
   }
 
-  public update(data: photos.Album, authToken: string|null) {
+  public async update(data: photos.Album) {
     this.qSpanX(0).innerText = data.title;
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;
     const url = data.coverPhotoBaseUrl + `=w${kImgSize}-h${kImgSize}-c`;
     const img = new Image();
     img.src = url;
-    img.decode().then(() => {
-      this.qLabel().style.backgroundImage = `url(${url})`;
-    }).catch(() => {
-      throw new Error('Could not load/decode big image.');
-    });
-
-    // const response = await fetch(
-    //         url, {mode: 'no-cors',
-    //         headers : {Authorization : `Bearer ${authToken}`}});
-    // const blob = await response.blob();
-    // img.src = URL.createObjectURL(blob);
+    await img.decode();
+    this.qLabel().style.backgroundImage = `url(${url})`;
   }
 }
 
@@ -126,29 +117,30 @@ export class AlbumList extends HTMLUListElement {
     this.style.padding = `${kPad}px`;
     this.style.userSelect = 'none';
   }
-  _update(model: MPUser, authToken:string|null) {
-    // TOOD: Removal logic.
+  _update(model: MPUser) {
+    // TODO: Removal logic.
     model.albums.forEach((data) => {
       let album = this.albums.get(data.id);
       if (album) {
-        // TODO: Update logic.
+        album.update(data);
         return;
       }
-      album = MPAlbum.create(data, authToken);
+      album = MPAlbum.create(data);
       this.albums.set(data.id, album);
       this.appendChild(album);
     });
+    // TODO: Reorder children.
   }
   static create() {
-    AlbumList.update(null);
+    AlbumList.update();
   }
-  static update(authToken: string|null) {
+  static update() {
     let list = <AlbumList>document.querySelector('#album-list');
     if (!list) {
       console.error('Missing <album-list>');
       return;
     }
-    list._update(MPUser.current, authToken);
+    list._update(MPUser.current);
   }
 }
 

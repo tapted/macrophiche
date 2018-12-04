@@ -4,7 +4,7 @@ module.exports = {
     "**/*.js",
     "**/*.html",
 //    "**/*.css",
-//    "**/*.ico",
+    "**/*.ico",
 //    "**/*.json"
   ],
   "swDest": "public/sw.js",
