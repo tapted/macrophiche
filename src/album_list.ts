@@ -2,10 +2,10 @@ import {MPUser} from './model';
 import {photos} from './photos_api';
 
 const kImgSize = 200;
-const kPad = 10;     // Padding between albums.
-const kOutline = 5;  // Thicknes of the selection outline.
-const kRadius = 5;   // Rectangle corner radius.
-const kMargin = 15;  // Margin around text inside each album.
+const kPad = 10;    // Padding between albums.
+const kOutline = 5; // Thicknes of the selection outline.
+const kRadius = 5;  // Rectangle corner radius.
+const kMargin = 15; // Margin around text inside each album.
 const kAlbumTemplate = document.createElement('template');
 kAlbumTemplate.innerHTML = `
 <style>
@@ -50,25 +50,17 @@ class ShadowElement extends HTMLElement {
     this.shadowRoot!.appendChild(template.content.cloneNode(true));
   }
 
-  qA(): HTMLAnchorElement {
-    return this.shadowRoot!.querySelector('a')!;
-  }
-  qLI(): HTMLLIElement {
-    return this.shadowRoot!.querySelector('li')!;
-  }
+  qA(): HTMLAnchorElement { return this.shadowRoot!.querySelector('a')!; }
+  qLI(): HTMLLIElement { return this.shadowRoot!.querySelector('li')!; }
   qLabel(): HTMLLabelElement {
     return this.shadowRoot!.querySelector('label')!;
   }
   qInput(): HTMLInputElement {
-    return this.shadowRoot!.querySelector('input')!;    
+    return this.shadowRoot!.querySelector('input')!;
   }
-  qImg(): HTMLImageElement {
-    return this.shadowRoot!.querySelector('img')!;
-  }
-  qSpan() : HTMLSpanElement {
-    return this.shadowRoot!.querySelector('span')!;
-  }
-  qSpanX(index: number) : HTMLSpanElement {
+  qImg(): HTMLImageElement { return this.shadowRoot!.querySelector('img')!; }
+  qSpan(): HTMLSpanElement { return this.shadowRoot!.querySelector('span')!; }
+  qSpanX(index: number): HTMLSpanElement {
     return this.shadowRoot!.querySelectorAll('span')[index];
   }
 }
@@ -82,7 +74,7 @@ class MPAlbum extends ShadowElement {
     this.li = this.qLI();
     this.check = this.qInput();
     this.check.addEventListener('input', () => {
-      this.li.style.backgroundColor = this.check.checked ? 'blue' : 'lightgray';   
+      this.li.style.backgroundColor = this.check.checked ? 'blue' : 'lightgray';
     });
   }
 
@@ -131,9 +123,7 @@ export class AlbumList extends HTMLUListElement {
     });
     // TODO: Reorder children.
   }
-  static create() {
-    AlbumList.update();
-  }
+  static create() { AlbumList.update(); }
   static update() {
     let list = <AlbumList>document.querySelector('#album-list');
     if (!list) {

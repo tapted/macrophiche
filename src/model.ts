@@ -28,14 +28,14 @@ function logError(err: any) {
 }
 
 let gapiReady = false;
-let onGapiReady: null | (() => void) = null;
+let onGapiReady: null|(() => void) = null;
 
 const kStoreName = 'mp-user';
 const idbReady = idb.open('users', 3, upgradeDB => {
   console.log('Preparing indexdb. oldVersion: ' + upgradeDB.oldVersion);
   switch (upgradeDB.oldVersion) {
-    case 0:
-      upgradeDB.createObjectStore(kStoreName);
+  case 0:
+    upgradeDB.createObjectStore(kStoreName);
   }
 });
 
@@ -72,12 +72,13 @@ export class MPUser {
     this.initApi();
   }
 
-  async getStore(write = false) : Promise<{store:any, albums: photos.Album[]}> {
+  async getStore(write = false):
+      Promise<{store : any, albums: photos.Album[]}> {
     const db = await idbReady;
     const tx = db.transaction(kStoreName, write ? 'readwrite' : 'readonly');
     const store = tx.objectStore(kStoreName);
     const data = await store.get(this.uid);
-    const result = {store: store, albums: []};
+    const result = {store : store, albums : []};
     if (data)
       result.albums = data.albums;
     return result;
@@ -96,7 +97,7 @@ export class MPUser {
 
   async save() {
     const store = await this.getStore(true);
-    await store.store.put({albums:this.albums}, this.uid);
+    await store.store.put({albums : this.albums}, this.uid);
     console.log('Saved ' + this.albums.length + ' albums.');
   }
 
@@ -177,7 +178,8 @@ export class MPUser {
     }
 
     const errorText = error ? ` (${error.message})` : '';
-    statusPara.innerText = `${this.albums.length} Albums loaded over gapi${errorText}. Ready.`;
+    statusPara.innerText =
+        `${this.albums.length} Albums loaded over gapi${errorText}. Ready.`;
     return [ this.albums, error ];
   }
 }

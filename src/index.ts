@@ -8,14 +8,11 @@ function finishLoad() {
 
   const webfont = document.createElement('script');
   webfont.onload = () => {
-    (<any>window).WebFont.load({
-      google: {
-        families: ['Roboto']
-      }
-    });
+    (<any>window).WebFont.load({google : {families : [ 'Roboto' ]}});
   };
   document.body.appendChild(webfont);
-  webfont.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
+  webfont.src =
+      'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
 }
 
 document.addEventListener('DOMContentLoaded', initfire);
