@@ -21,4 +21,16 @@ export interface Album {
   coverPhotoBaseUrl: string;
   coverPhotoMediaItemId: string;
 }
+export interface MediaMetadata {}
+export interface ContributorInfo {}
+export interface MediaItem {
+  id: string;
+  description: string;
+  productUrl: string;
+  baseUrl: string;
+  mimeType: string;
+  mediaMetadata: MediaMetadata;
+  contributorInfo: ContributorInfo;
+  filename: string;
+}
 }

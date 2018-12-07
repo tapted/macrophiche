@@ -14,7 +14,7 @@ const kApiEndpoint = 'https://photoslibrary.googleapis.com';
 
 const statusPara = <HTMLParagraphElement>document.querySelector('p.status');
 
-function logError(err: any) {
+export function logError(err: any) {
   if (err.error && err.error.code) {
     console.log(err.error);
     return err.error;
@@ -136,6 +136,21 @@ export class MPUser {
     this.updateAlbums();
   }
 
+  public async gapiFetch(url: string, post: object|null = null) {
+    if (!this.gapiUser)
+      throw new Error('Missing GAPI user for fetch.');
+    const authToken = this.gapiUser.getAuthResponse().access_token;
+    const options: RequestInit = {};
+    options.headers = {Authorization : `Bearer ${authToken}`};
+    if (post) {
+      options.headers['Content-Type'] = 'application/json; charset=utf-8';
+      options.method = 'POST';
+      options.body = JSON.stringify(post);
+    }
+    const response = await fetch(kApiEndpoint + url, options);
+    return response.json();
+  }
+
   async updateAlbums() {
     statusPara.innerText = 'Updating albums via gapi…';
     this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
@@ -144,15 +159,12 @@ export class MPUser {
     let error = null;
 
     try {
-      const authToken = this.gapiUser.getAuthResponse().access_token;
       let nextPageToken = null;
       do {
-        let url = kApiEndpoint + '/v1/albums?pageSize=' + kAlbumPageSize;
+        let url = '/v1/albums?pageSize=' + kAlbumPageSize;
         if (nextPageToken)
           url += '&pageToken=' + nextPageToken;
-        const response = await fetch(
-            url, {headers : {Authorization : `Bearer ${authToken}`}});
-        const result = await response.json();
+        const result = await this.gapiFetch(url);
         if (!result)
           break;
 
