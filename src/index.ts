@@ -18,7 +18,7 @@ function finishLoad() {
 
 document.addEventListener('DOMContentLoaded', initfire);
 
-function showRefreshUI(registration:ServiceWorkerRegistration) {
+function showRefreshUI(registration: ServiceWorkerRegistration) {
   var button = document.createElement('button');
   button.style.position = 'absolute';
   button.style.bottom = '24px';
@@ -27,7 +27,7 @@ function showRefreshUI(registration:ServiceWorkerRegistration) {
 
   button.addEventListener('click', () => {
     if (!registration.waiting)
-      return;  // Can't postMessage yet.
+      return; // Can't postMessage yet.
 
     button.disabled = true;
     registration.waiting.postMessage('skipWaiting');
@@ -36,12 +36,13 @@ function showRefreshUI(registration:ServiceWorkerRegistration) {
   document.body.appendChild(button);
 };
 
-function onNewServiceWorker(registration:ServiceWorkerRegistration, callback:()=>void) {
+function onNewServiceWorker(registration: ServiceWorkerRegistration,
+                            callback: () => void) {
   if (registration.waiting)
     return callback();
 
   function listenInstalledStateChange() {
-    registration.installing!.addEventListener('statechange', (event:any) => {
+    registration.installing!.addEventListener('statechange', (event: any) => {
       // A new service worker is available.
       if (event.target.state === 'installed')
         callback();
@@ -64,21 +65,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Track updates to the Service Worker.
         if (!navigator.serviceWorker.controller)
-          return;   // New service worker (no other clients).
+          return; // New service worker (no other clients).
 
         // When the user asks to refresh the UI, we'll need to reload the window
         let preventDevToolsReloadLoop = false;
-        navigator.serviceWorker.addEventListener('controllerchange', (event) => {
-          if (preventDevToolsReloadLoop)
-            return;
-          preventDevToolsReloadLoop = true;
-          console.log('Controller loaded');
-          window.location.reload();
-        });
+        navigator.serviceWorker.addEventListener(
+            'controllerchange', (event) => {
+              if (preventDevToolsReloadLoop)
+                return;
+              preventDevToolsReloadLoop = true;
+              console.log('Controller loaded');
+              window.location.reload();
+            });
 
-        onNewServiceWorker(registration, () => {
-          showRefreshUI(registration);
-        });
+        onNewServiceWorker(registration,
+                           () => { showRefreshUI(registration); });
 
         console.log('SW registered: ', registration);
       } catch (registrationError) {

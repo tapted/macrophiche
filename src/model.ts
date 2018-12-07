@@ -56,11 +56,13 @@ export class MPUser {
     this.emailVerified = authUser.emailVerified;
     this.photoUrl = authUser.photoURL || kNoPhotoUrl;
     this.isAnonymous = authUser.isAnonymous;
-    this.uid = authUser.uid;
     this.providerData = authUser.providerData;
 
     this.authUser = authUser;
-    this.tryLoad();
+    if (this.uid != authUser.uid) {
+      this.uid = authUser.uid;
+      this.tryLoad();
+    }
     this.initApi();
   }
 
@@ -80,9 +82,19 @@ export class MPUser {
     }
   }
 
+  async tryEarlyLoad() {
+    if (this.uid != 0)
+      return;
+
+    const data = await schema.getGlobal();
+    this.uid = data.lastUid;
+    this.tryLoad();
+  }
+
   async save() {
     await schema.setForUid(this.uid, {albums : this.albums});
     console.log('Saved ' + this.albums.length + ' albums.');
+    await schema.setGlobal({lastUid : this.uid});
   }
 
   async initApi() {
@@ -184,6 +196,8 @@ function gapiPreload() {
 }
 
 document.addEventListener('serviceworker-ready', gapiPreload);
+document.addEventListener('serviceworker-ready',
+                          () => { MPUser.current.tryEarlyLoad(); });
 
 document.addEventListener('firebase-ready', (event) => {
   if (!firebase.auth)
