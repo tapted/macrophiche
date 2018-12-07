@@ -1,8 +1,8 @@
 import {MPUser} from './model';
 import {photos} from './photos_api';
 
-const kImgSize = 200;
-const kPad = 10;    // Padding between albums.
+const kImgSize = 150;
+const kPad = 8;     // Padding between albums.
 const kOutline = 5; // Thicknes of the selection outline.
 const kRadius = 5;  // Rectangle corner radius.
 const kMargin = 15; // Margin around text inside each album.
