@@ -9,6 +9,8 @@ package-lock.json
 public/js/
 
 
+*.sublime-workspace
+
 # Logs
 logs
 *.log
