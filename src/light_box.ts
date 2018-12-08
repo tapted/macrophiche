@@ -22,18 +22,20 @@ export class LightBox extends HTMLElement {
     this.style.marginTop = '8px';
     this.style.borderRadius = '3px';
     this.style.position = 'relative';
+    const container = document.createElement('div');
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.position = 'absolute';
+    container.style.top = '0';
+    container.style.width = '0';
     this.img = document.createElement('img');
-    this.img.style.width = '100%';
-    this.img.style.height = '100%';
-    this.img.style.position = 'absolute';
-    this.img.style.top = '0';
-    this.img.style.width = '0';
-    this.appendChild(this.img);
+    container.appendChild(this.img);
+    this.appendChild(container);
   }
   private async _update(album: photos.Album) {
     this.items = [];
     statusPara.innerText =
-        `TODO: Load album: ${album.id} into lbw=${width} w=${screenWidth}`;
+        `TODO: Load album: ${album.id} into lbw=${this.clientWidth} w=${screenWidth}`;
 
     let error = null;
     try {

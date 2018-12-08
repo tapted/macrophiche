@@ -48,7 +48,12 @@ export class MPUser {
 
   public albums: photos.Album[] = [];
 
-  constructor() {}
+  refreshButton: HTMLButtonElement;
+
+  constructor() {
+    this.refreshButton = <HTMLButtonElement>document.querySelector('button.refresh-albums');
+    this.refreshButton.addEventListener('click', this.updateAlbums.bind(this));
+  }
 
   apply(authUser: User) {
     this.displayName = authUser.displayName || 'Name Unknown';
@@ -109,11 +114,9 @@ export class MPUser {
       scope : apikeys.kScopes.join(' ')
     });
 
-    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      this.updateAlbums();
-    }
     document.querySelector('#load-api')!.addEventListener(
         'click', this.signIn.bind(this));
+    this.refresh(true);
   }
 
   async signIn() {
@@ -127,13 +130,21 @@ export class MPUser {
     const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
     await firebase.auth().signInAndRetrieveDataWithCredential(credential);
 
+    this.refresh();
+  }
+
+  refresh(first = false) {
     if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      statusPara.innerText = 'Failed to link photos API.';
-      // firebase.auth!().signOut(); // Something went wrong, sign out
+      statusPara.innerText = 'Not linked to photos API.';
+      this.refreshButton.disabled = true;
       return;
     }
-
-    this.updateAlbums();
+    if (first)
+      statusPara.innerText = 'gapi ready. Using cached data.';
+    this.refreshButton.disabled = false;
+    this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
+    if (this.albums.length == 0)
+      this.updateAlbums();
   }
 
   public async gapiFetch(url: string, post: object|null = null) {
@@ -152,8 +163,8 @@ export class MPUser {
   }
 
   async updateAlbums() {
+    this.refreshButton.disabled = true;
     statusPara.innerText = 'Updating albums via gapi…';
-    this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
     this.albums = [];
 
     let error = null;
@@ -184,6 +195,7 @@ export class MPUser {
     } catch (err) {
       error = logError(err);
     }
+    this.refreshButton.disabled = false;
 
     const errorText = error ? ` (${error.message})` : '';
     statusPara.innerText =
