@@ -28,17 +28,24 @@ async function asyncFetch(params, event, resolve) {
     const response = await imgCache.match(key, kOptions);
     if (response) {
       resolve(response);
-      console.log('cached response');
-      return response;
+      const length = response.headers.get('Content-Length');
+      console.log(`Cached response (length=${length}).`);
+      return;
     }
   }
   //const realRequest = new Request(params.url);
   const response = await fetch(params.url, {mode: 'no-cors'});
   const responseToCache = response.clone();
   resolve(response);
+  const length = response.headers.get('Content-Length');
+  if (length == null || length == 0) {
+    console.log(`NOT caching: fetched response has:
+      Content-Length=${length}, forced=${params.force}.`);
+    return;
+  }
   const imgCache = await imgCacheReady;
   imgCache.put(key, responseToCache);
-  console.log('fetched response, forced=' + params.force)  
+  console.log(`fetched length=${length}, forced=${params.force}`);  
 }
 const imgProxyHandler = ({url, event, params}) => {
   const [, , photo, album] = url.pathname.split('/');
@@ -48,7 +55,7 @@ const imgProxyHandler = ({url, event, params}) => {
     args[pair[0]] = decodeURIComponent(pair[1]);
   });
   return new Promise((resolve, reject) => {
-    return asyncFetch(args, event, resolve);
+    asyncFetch(args, event, resolve);
   });
 };
 
