@@ -1,4 +1,4 @@
-import {MPUser} from './model';
+import {logError, MPUser} from './model';
 import {photos} from './photos_api';
 
 const kImgSize = 150;
@@ -96,7 +96,16 @@ class MPAlbum extends ShadowElement {
     const url = data.coverPhotoBaseUrl + `=w${kImgSize}-h${kImgSize}-c`;
     const img = new Image();
     img.src = '/imgproxy/albumcover/' + data.id + '/?url=' + encodeURIComponent(url);
-    await img.decode();
+    try {
+      await img.decode();
+    } catch (e) {
+      img.src = img.src + '&force=1';
+      try {
+        await img.decode();
+       } catch (e) {
+         // Try refreshing albums.
+       }
+    }
     this.qLabel().style.backgroundImage = `url(${url})`;
   }
 }

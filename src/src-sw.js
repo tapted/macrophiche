@@ -1,48 +1,59 @@
+console.log('verbose loggin..');
+workbox.core.setLogLevel(workbox.core.LOG_LEVELS.debug);
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
 const thumbRegex = new RegExp('=w[0-9]*-h[0-9]*-c$');
 const matchThumb = ({url, event}) => {
+  console.log(url);
   if (!url.hostname.endsWith('googleusercontent.com'))
     return false;
   return thumbRegex.test(url.pathname);
 };
 
-workbox.routing.registerRoute(
-  matchThumb,
-  workbox.strategies.staleWhileRevalidate(),
-);
+//workbox.routing.registerRoute(
+//  matchThumb,
+//  workbox.strategies.staleWhileRevalidate(),
+//);
 
 
 const imgCacheReady = caches.open('img-cache');
-const imgProxyHandler = async ({encodedUrl, event, params}) => {
-  const [, photo, album, search] = encodedUrl.split('/');
-  const params = {};
-  search.split('?')[0].split('&').forEach((item) => {
-    const pair = item.split('=');
-    params[pair[0]] = decodeURIComponent(pair[1]);
-  });
-  console.log(encodedUrl);
-  console.log(params);
+const matchImgProxy = ({url, event}) => {
+  return url.pathname.startsWith('/imgproxy/');
+};
+async function asyncFetch(params, event, resolve) {
+  const key = new Request(event.request.url.split('?')[0]);
   if (!params.force) {
     const kOptions = { ignoreSearch: true };
     const imgCache = await imgCacheReady;
-    const response = await imgCache.match(event.request);
+    const response = await imgCache.match(key, kOptions);
     if (response) {
-      event.respondWith(response);
+      resolve(response);
       console.log('cached response');
-      return;
+      return response;
     }
   }
   //const realRequest = new Request(params.url);
-  const response = await fetch(params.url);
-  event.respondWith(response);
+  const response = await fetch(params.url, {mode: 'no-cors'});
+  const responseToCache = response.clone();
+  resolve(response);
   const imgCache = await imgCacheReady;
-  imgCache.put(event.request, response);
-  console.log('fetched response, forced=' + params.force)
+  imgCache.put(key, responseToCache);
+  console.log('fetched response, forced=' + params.force)  
+}
+const imgProxyHandler = ({url, event, params}) => {
+  const [, , photo, album] = url.pathname.split('/');
+  const args = {};
+  url.search.substr(1).split('&').forEach((item) => {
+    const pair = item.split('=');
+    args[pair[0]] = decodeURIComponent(pair[1]);
+  });
+  return new Promise((resolve, reject) => {
+    return asyncFetch(args, event, resolve);
+  });
 };
 
 workbox.routing.registerRoute(
-  new RegExp('/imgproxy/'),
+  matchImgProxy,
   imgProxyHandler
 );
 
