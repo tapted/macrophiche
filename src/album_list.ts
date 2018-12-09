@@ -6,6 +6,7 @@ const kPad = 8;     // Padding between albums.
 const kOutline = 5; // Thicknes of the selection outline.
 const kRadius = 5;  // Rectangle corner radius.
 const kMargin = 15; // Margin around text inside each album.
+const kLimit = 2;  // Album limit.
 const kAlbumTemplate = document.createElement('template');
 kAlbumTemplate.innerHTML = `
 <style>
@@ -94,7 +95,7 @@ class MPAlbum extends ShadowElement {
     this.qSpanX(1).innerText = data.mediaItemsCount;
     const url = data.coverPhotoBaseUrl + `=w${kImgSize}-h${kImgSize}-c`;
     const img = new Image();
-    img.src = url;
+    img.src = '/imgproxy/albumcover/' + data.id + '/?url=' + encodeURIComponent(url);
     await img.decode();
     this.qLabel().style.backgroundImage = `url(${url})`;
   }
@@ -115,7 +116,11 @@ export class AlbumList extends HTMLUListElement {
   }
   _update(model: MPUser) {
     // TODO: Removal logic.
+    let count = 0;
     model.albums.forEach((data) => {
+      if (++count > kLimit)
+        return;
+
       let album = this.albums.get(data.id);
       if (album) {
         album.update(data);

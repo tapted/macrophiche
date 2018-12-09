@@ -12,6 +12,40 @@ workbox.routing.registerRoute(
   workbox.strategies.staleWhileRevalidate(),
 );
 
+
+const imgCacheReady = caches.open('img-cache');
+const imgProxyHandler = async ({encodedUrl, event, params}) => {
+  const [, photo, album, search] = encodedUrl.split('/');
+  const params = {};
+  search.split('?')[0].split('&').forEach((item) => {
+    const pair = item.split('=');
+    params[pair[0]] = decodeURIComponent(pair[1]);
+  });
+  console.log(encodedUrl);
+  console.log(params);
+  if (!params.force) {
+    const kOptions = { ignoreSearch: true };
+    const imgCache = await imgCacheReady;
+    const response = await imgCache.match(event.request);
+    if (response) {
+      event.respondWith(response);
+      console.log('cached response');
+      return;
+    }
+  }
+  //const realRequest = new Request(params.url);
+  const response = await fetch(params.url);
+  event.respondWith(response);
+  const imgCache = await imgCacheReady;
+  imgCache.put(event.request, response);
+  console.log('fetched response, forced=' + params.force)
+};
+
+workbox.routing.registerRoute(
+  new RegExp('/imgproxy/'),
+  imgProxyHandler
+);
+
 self.addEventListener('message', (event) => {
   if (!event.data)
     return;
