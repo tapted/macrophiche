@@ -162,6 +162,23 @@ export class MPUser {
     return response.json();
   }
 
+  public async imgFetch(key: string, baseUrl: string, width: number, height: number, crop = false) {
+    const url = baseUrl + `=w${width}-h${height}${crop ? '-c' : ''}`;
+    const img = new Image();
+    img.src = '/imgproxy/' + key + '/?url=' + encodeURIComponent(url);
+    try {
+      await img.decode();
+    } catch (e) {
+      img.src = img.src + '&force=1';
+      try {
+        await img.decode();
+      } catch (e) {
+        return '/images/stale.png';
+      }
+    }
+    return url;
+  }
+
   async updateAlbums() {
     this.refreshButton.disabled = true;
     statusPara.innerText = 'Updating albums via gapi…';

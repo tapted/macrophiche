@@ -93,19 +93,8 @@ class MPAlbum extends ShadowElement {
     this.qSpanX(0).innerText = data.title;
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;
-    const url = data.coverPhotoBaseUrl + `=w${kImgSize}-h${kImgSize}-c`;
-    const img = new Image();
-    img.src = '/imgproxy/albumcover/' + data.id + '/?url=' + encodeURIComponent(url);
-    try {
-      await img.decode();
-    } catch (e) {
-      img.src = img.src + '&force=1';
-      try {
-        await img.decode();
-       } catch (e) {
-         // Try refreshing albums.
-       }
-    }
+    const url = await MPUser.current.imgFetch('albumcover/' + data.id,
+      data.coverPhotoBaseUrl, kImgSize, kImgSize, true);
     this.qLabel().style.backgroundImage = `url(${url})`;
   }
 }

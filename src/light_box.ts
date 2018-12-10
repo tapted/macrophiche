@@ -55,8 +55,7 @@ export class LightBox extends HTMLElement {
         if (result.mediaItems) {
           const items = result.mediaItems.filter((x: object) => !!x);
           this.items = this.items.concat(items);
-          this.img.src =
-              this.items[0].baseUrl + `=w${screenWidth}-h${screenHeight}`;
+          this.img.src = await MPUser.current.imgFetch('item/' + this.items[0].id,this.items[0].baseUrl, screenWidth, screenHeight);
           break;
         }
         nextPageToken = result.nextPageToken;
