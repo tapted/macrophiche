@@ -1,60 +1,36 @@
-console.log('verbose loggin..');
-workbox.core.setLogLevel(workbox.core.LOG_LEVELS.debug);
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-const thumbRegex = new RegExp('=w[0-9]*-h[0-9]*-c$');
-const matchThumb = ({url, event}) => {
-  console.log(url);
-  if (!url.hostname.endsWith('googleusercontent.com'))
-    return false;
-  return thumbRegex.test(url.pathname);
-};
-
-//workbox.routing.registerRoute(
-//  matchThumb,
-//  workbox.strategies.staleWhileRevalidate(),
-//);
-
-
 const imgCacheReady = caches.open('img-cache');
+async function asyncFetch(params, key, resolve, reject) {
+  try {
+    const imgCache = await imgCacheReady;
+    if (!params.force) {
+      const response = await imgCache.match(key);
+      if (response) {
+        resolve(response);
+        console.log(`Cached response.`);
+        return;
+      }
+    }
+    const response = await fetch(params.url, {mode: 'no-cors'});
+    const responseToCache = response.clone();
+    resolve(response);
+    // Note: Eached cached opaque response takes up 7MB of quota.
+    // The Photos API sends Access-Control-Expose-Headers: Content-Length,
+    // but there doesn't seem to be any way to use it for an opaque response.
+    // (The API response doesn't allow any origins either, so setting that
+    // header seems to be useless?).
+    imgCache.put(key, responseToCache);
+    console.log(`Fetched. Cached. forced=${params.force}.`);
+  } catch (e) {
+    reject(e);
+  }
+}
+
 const matchImgProxy = ({url, event}) => {
   return url.pathname.startsWith('/imgproxy/');
 };
-async function asyncFetch(params, event, resolve) {
-  const key = new Request(event.request.url.split('?')[0]);
-  if (!params.force) {
-    const kOptions = { ignoreSearch: true };
-    const imgCache = await imgCacheReady;
-    const response = await imgCache.match(key, kOptions);
-    if (response) {
-      resolve(response);
-      const length = response.headers.get('Content-Length');
-      console.log(`Cached response (length=${length}).`);
-      return;
-    }
-  }
-  //const realRequest = new Request(params.url);
-  const headers = {};
-  headers['Access-Control-Request-Headers'] = 'Content-Length';
-  const response = await fetch(params.url, {mode: 'no-cors', credentials: 'include', headers: headers});
-  const length = response.headers.get('Content-Length');
-  console.log(response);
-  console.log(response.headers);
-  console.log('reading headers..');
-  response.headers.forEach((val, key) => {
-    console.log(val, key);
-  });
-  const responseToCache = response.clone();
-  resolve(response);
-  if (length == null || length == 0) {
-    console.log(`NOT caching: fetched response has:
-      Content-Length=${length}, forced=${params.force}.`);
-    return;
-  }
-  const imgCache = await imgCacheReady;
-  imgCache.put(key, responseToCache);
-  console.log(`fetched length=${length}, forced=${params.force}`);  
-}
+
 const imgProxyHandler = ({url, event, params}) => {
   const [, , photo, album] = url.pathname.split('/');
   const args = {};
@@ -62,8 +38,9 @@ const imgProxyHandler = ({url, event, params}) => {
     const pair = item.split('=');
     args[pair[0]] = decodeURIComponent(pair[1]);
   });
+  const key = new Request(event.request.url.split('?')[0]);
   return new Promise((resolve, reject) => {
-    asyncFetch(args, event, resolve);
+    asyncFetch(args, key, resolve, reject);
   });
 };
 
