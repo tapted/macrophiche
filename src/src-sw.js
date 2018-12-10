@@ -34,10 +34,18 @@ async function asyncFetch(params, event, resolve) {
     }
   }
   //const realRequest = new Request(params.url);
-  const response = await fetch(params.url, {mode: 'no-cors'});
+  const headers = {};
+  headers['Access-Control-Request-Headers'] = 'Content-Length';
+  const response = await fetch(params.url, {mode: 'no-cors', credentials: 'include', headers: headers});
+  const length = response.headers.get('Content-Length');
+  console.log(response);
+  console.log(response.headers);
+  console.log('reading headers..');
+  response.headers.forEach((val, key) => {
+    console.log(val, key);
+  });
   const responseToCache = response.clone();
   resolve(response);
-  const length = response.headers.get('Content-Length');
   if (length == null || length == 0) {
     console.log(`NOT caching: fetched response has:
       Content-Length=${length}, forced=${params.force}.`);
