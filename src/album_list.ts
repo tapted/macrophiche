@@ -6,7 +6,7 @@ const kPad = 8;     // Padding between albums.
 const kOutline = 5; // Thicknes of the selection outline.
 const kRadius = 5;  // Rectangle corner radius.
 const kMargin = 15; // Margin around text inside each album.
-const kLimit = 2;  // Album limit.
+const kLimit = 2;   // Album limit.
 const kAlbumTemplate = document.createElement('template');
 kAlbumTemplate.innerHTML = `
 <style>
@@ -94,7 +94,8 @@ class MPAlbum extends ShadowElement {
     this.qA().href = data.productUrl;
     this.qSpanX(1).innerText = data.mediaItemsCount;
     const url = await MPUser.current.imgFetch('albumcover/' + data.id,
-      data.coverPhotoBaseUrl, kImgSize, kImgSize, true);
+                                              data.coverPhotoBaseUrl, kImgSize,
+                                              kImgSize, true);
     this.qLabel().style.backgroundImage = `url(${url})`;
   }
 }

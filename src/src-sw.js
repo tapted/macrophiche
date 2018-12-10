@@ -12,7 +12,7 @@ async function asyncFetch(params, key, resolve, reject) {
         return;
       }
     }
-    const response = await fetch(params.url, {mode: 'no-cors'});
+    const response = await fetch(params.url, {mode : 'no-cors'});
     const responseToCache = response.clone();
     resolve(response);
     // Note: Eached cached opaque response takes up 7MB of quota.
@@ -27,9 +27,8 @@ async function asyncFetch(params, key, resolve, reject) {
   }
 }
 
-const matchImgProxy = ({url, event}) => {
-  return url.pathname.startsWith('/imgproxy/');
-};
+const matchImgProxy =
+    ({url, event}) => { return url.pathname.startsWith('/imgproxy/'); };
 
 const imgProxyHandler = ({url, event, params}) => {
   const [, , photo, album] = url.pathname.split('/');
@@ -39,25 +38,21 @@ const imgProxyHandler = ({url, event, params}) => {
     args[pair[0]] = decodeURIComponent(pair[1]);
   });
   const key = new Request(event.request.url.split('?')[0]);
-  return new Promise((resolve, reject) => {
-    asyncFetch(args, key, resolve, reject);
-  });
+  return new Promise(
+      (resolve, reject) => { asyncFetch(args, key, resolve, reject); });
 };
 
-workbox.routing.registerRoute(
-  matchImgProxy,
-  imgProxyHandler
-);
+workbox.routing.registerRoute(matchImgProxy, imgProxyHandler);
 
 self.addEventListener('message', (event) => {
   if (!event.data)
     return;
 
   switch (event.data) {
-    case 'skipWaiting':
-      self.skipWaiting();
-      break;
-    default:
-      break;
+  case 'skipWaiting':
+    self.skipWaiting();
+    break;
+  default:
+    break;
   }
 });

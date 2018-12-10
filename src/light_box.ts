@@ -34,8 +34,8 @@ export class LightBox extends HTMLElement {
   }
   private async _update(album: photos.Album) {
     this.items = [];
-    statusPara.innerText =
-        `TODO: Load album: ${album.id} into lbw=${this.clientWidth} w=${screenWidth}`;
+    statusPara.innerText = `TODO: Load album: ${album.id} into lbw=${
+        this.clientWidth} w=${screenWidth}`;
 
     let error = null;
     try {
@@ -55,7 +55,9 @@ export class LightBox extends HTMLElement {
         if (result.mediaItems) {
           const items = result.mediaItems.filter((x: object) => !!x);
           this.items = this.items.concat(items);
-          this.img.src = await MPUser.current.imgFetch('item/' + this.items[0].id,this.items[0].baseUrl, screenWidth, screenHeight);
+          this.img.src = await MPUser.current.imgFetch(
+              'item/' + this.items[0].id, this.items[0].baseUrl, screenWidth,
+              screenHeight);
           break;
         }
         nextPageToken = result.nextPageToken;
