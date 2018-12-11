@@ -53,7 +53,9 @@ export class MPUser {
   constructor() {
     this.refreshButton =
         <HTMLButtonElement>document.querySelector('button.refresh-albums');
-    this.refreshButton.addEventListener('click', this.updateAlbums.bind(this));
+    if (this.refreshButton)
+      this.refreshButton.addEventListener('click',
+                                          this.updateAlbums.bind(this));
   }
 
   apply(authUser: User) {
