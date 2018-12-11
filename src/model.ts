@@ -49,11 +49,19 @@ export class MPUser {
   public albums: photos.Album[] = [];
 
   refreshButton: HTMLButtonElement;
+  tokenPromise: Promise<string>;
+  resolveToken: ((token:string) => void) | null = null;
+  rejectToken: ((error:string) => void) | null = null;
 
   constructor() {
+    this.tokenPromise = new Promise((resolve, reject) => {
+      this.resolveToken = resolve;
+      this.rejectToken = reject;
+    });
     this.refreshButton =
         <HTMLButtonElement>document.querySelector('button.refresh-albums');
-    this.refreshButton.addEventListener('click', this.updateAlbums.bind(this));
+    if (this.refreshButton)
+      this.refreshButton.addEventListener('click', this.updateAlbums.bind(this));
   }
 
   apply(authUser: User) {
@@ -144,6 +152,9 @@ export class MPUser {
       statusPara.innerText = 'gapi ready. Using cached data.';
     this.refreshButton.disabled = false;
     this.gapiUser = gapi.auth2.getAuthInstance().currentUser.get();
+    if (this.resolveToken)
+      this.resolveToken(this.gapiUser.getAuthResponse().access_token);
+
     if (this.albums.length == 0)
       this.updateAlbums();
   }
@@ -151,9 +162,9 @@ export class MPUser {
   public async gapiFetch(url: string, post: object|null = null) {
     if (!this.gapiUser)
       throw new Error('Missing GAPI user for fetch.');
-    const authToken = this.gapiUser.getAuthResponse().access_token;
+    const token = this.gapiUser.getAuthResponse().access_token;
     const options: RequestInit = {};
-    options.headers = {Authorization : `Bearer ${authToken}`};
+    options.headers = {Authorization : `Bearer ${token}`};
     if (post) {
       options.headers['Content-Type'] = 'application/json; charset=utf-8';
       options.method = 'POST';
@@ -167,11 +178,21 @@ export class MPUser {
                         height: number, crop = false) {
     const url = baseUrl + `=w${width}-h${height}${crop ? '-c' : ''}`;
     const img = new Image();
-    img.src = '/imgproxy/' + key + '/?url=' + encodeURIComponent(url);
+    let query = '/imgproxy/' + key + '/?url=' + encodeURIComponent(url);
+    const hasBearer = this.gapiUser != null;
+    if (this.gapiUser) {
+      const token = this.gapiUser.getAuthResponse().access_token;
+      query += '&bearer=' + encodeURIComponent(token);
+    }
+    img.src = query;
     try {
       await img.decode();
     } catch (e) {
-      img.src = img.src + '&force=1';
+      if (!hasBearer) {
+        const token = await this.tokenPromise;
+        query += '&bearer=' + encodeURIComponent(token);
+      }
+      img.src = query + '&force=1';
       try {
         await img.decode();
       } catch (e) {

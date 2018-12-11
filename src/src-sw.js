@@ -12,7 +12,19 @@ async function asyncFetch(params, key, resolve, reject) {
         return;
       }
     }
-    const response = await fetch(params.url, {mode : 'no-cors'});
+    const headers = {};
+    let mode = 'cors';
+    if (params.bearer) {
+      console.log('Adding Bearer');
+      // headers['Authorization'] = `Bearer: ${params.bearer}`;
+      params.url += `&access_token=${params.bearer}`;
+    } else {
+      console.log('no bearer - skip cors');
+      reject('need a bearer');
+      return;
+      mode = 'no-cors';
+    }
+    const response = await fetch(params.url, {mode : mode, headers: headers});
     const responseToCache = response.clone();
     resolve(response);
     // Note: Eached cached opaque response takes up 7MB of quota.
